@@ -36,6 +36,7 @@ jobs:
       - run: ./gradlew wrapper --gradle-version=7.1.1 --distribution-type=bin
       - run: ./gradlew tasks
       - run: ./gradlew dependencies
+      - run: sudo pip install --user codecov
 
       - save_cache:
           paths:
@@ -53,6 +54,6 @@ jobs:
           command: ./gradlew jacocoTestReport
 
       # Upload test coverage
-      - run: sudo pip install --user codecov
+      - run:
           name: Upload test coverage
           command: bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
