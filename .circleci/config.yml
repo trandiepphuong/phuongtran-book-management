@@ -23,7 +23,6 @@ jobs:
 
     steps:
       - checkout
-      - run: sudo pip install codecov
       # Download and cache dependencies
       - restore_cache:
           key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
