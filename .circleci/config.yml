@@ -53,6 +53,6 @@ jobs:
           command: ./gradlew jacocoTestReport
 
       # Upload test coverage
-      - run:
+      - run: sudo pip install --user codecov
           name: Upload test coverage
           command: bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
