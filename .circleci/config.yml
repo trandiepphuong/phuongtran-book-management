@@ -23,10 +23,12 @@ jobs:
 
     steps:
       - checkout
-
+      - run:
+          name: pre-dependencies
+          command: sudo pip install codecov
       # Download and cache dependencies
       - restore_cache:
-            key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+          key: v1-gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "build.gradle" }}
@@ -36,9 +38,6 @@ jobs:
       - run: ./gradlew wrapper --gradle-version=7.1.1 --distribution-type=bin
       - run: ./gradlew tasks
       - run: ./gradlew dependencies
-      - run:
-          name: pre-dependencies
-          command: sudo pip install codecov
 
       - save_cache:
           paths:
