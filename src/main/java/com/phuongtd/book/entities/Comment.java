@@ -1,5 +1,6 @@
 package com.phuongtd.book.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,15 +12,15 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "comment")
+@Table(name = "comment",schema = "public")
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     int id;
 
-    @Column(name="massage")
-    String massage;
+    @Column(name="message")
+    String message;
 
     @Column(name="created_at")
     Date createdAt;
@@ -29,9 +30,11 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties("bookList")
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "book_id")
+    @JsonIgnoreProperties("commentList")
     private Book book;
 }

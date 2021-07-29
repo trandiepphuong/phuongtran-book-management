@@ -1,10 +1,12 @@
 package com.phuongtd.book.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.BitSet;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "book")
+@Table(name = "book",schema = "public")
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,11 +37,14 @@ public class Book {
     Date updatedAt;
 
     @Column(name = "enabled")
-    Boolean enabled;
+    boolean enabled;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties("bookList")
     private User user;
 
+    @OneToMany(mappedBy = "book",fetch = FetchType.EAGER)
+    List<Comment> commentList;
 
 }
