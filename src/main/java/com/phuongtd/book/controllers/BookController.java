@@ -18,8 +18,8 @@ public class BookController {
     BookService bookService;
 
     @GetMapping
-    public List<Book> findAll() {
-        return bookService.findAll();
+    public List<Book> getEnabledBook() {
+        return bookService.findEnabledBook();
     }
 
     @GetMapping("/sort")

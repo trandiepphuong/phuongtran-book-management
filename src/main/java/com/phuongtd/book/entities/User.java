@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user",schema = "public")
+@Table(name = "user", schema = "public")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class User {
     @Column(name = "email")
     String email;
 
-    @Column(name= "password")
+    @Column(name = "password")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     String password;
 
@@ -34,7 +34,7 @@ public class User {
     @Column(name = "last_name")
     String lastName;
 
-    @Column(name="enabled")
+    @Column(name = "enabled")
     Boolean enabled;
 
     @ManyToOne
@@ -44,4 +44,6 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     List<Book> bookList;
+
+    String token;
 }

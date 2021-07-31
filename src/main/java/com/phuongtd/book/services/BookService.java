@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -27,25 +28,31 @@ public class BookService {
         System.out.println(date + " " + time);
         return formatter1.parse(date + " " + time);
     }
-
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    public List<Book> filterEnabled(List<Book> bookList){
+        List<Book> result = new ArrayList<>();
+        for (Book book : bookList){
+            if (book.isEnabled()) result.add(book);
+        }
+        return result;
+    }
+    public List<Book> findEnabledBook() {
+        return filterEnabled(bookRepository.findAll());
     }
 
     public List<Book> findAllByOrderByTitle() {
-        return bookRepository.findAllByOrderByTitle();
+        return filterEnabled(bookRepository.findAllByOrderByTitle());
     }
 
     public List<Book> findAllByOrderByAuthor() {
-        return bookRepository.findAllByOrderByAuthor();
+        return filterEnabled(bookRepository.findAllByOrderByAuthor());
     }
 
     public List<Book> findAllByOrderByCreatedAt() {
-        return bookRepository.findAllByOrderByCreatedAt();
+        return filterEnabled(bookRepository.findAllByOrderByCreatedAt());
     }
 
     public List<Book> findByTitleContainingOrAuthorContaining(String keyword) {
-        return bookRepository.findByTitleOrAuthor(keyword);
+        return filterEnabled(bookRepository.findByTitleOrAuthor(keyword));
     }
 
     public ResponseEntity<?> findById(int id) {
@@ -80,6 +87,34 @@ public class BookService {
             oldBook.get().setAuthor(book.getAuthor());
             oldBook.get().setDescription(book.getDescription());
             oldBook.get().setCommentList(book.getCommentList());
+            return new ResponseEntity<>(bookRepository.save(oldBook.get()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Book ID is not available", HttpStatus.NOT_FOUND);
+    }
+
+    public List<Book> findAll() {
+        return bookRepository.findAll();
+    }
+
+    public ResponseEntity<?> addBookAsAdmin(Book book) throws ParseException {
+        book.setCreatedAt(getCurrentTime());
+        book.setUpdatedAt(getCurrentTime());
+        book.setEnabled(true);
+        return new ResponseEntity<>(bookRepository.save(book), HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<?> enableBook(int id) {
+        Optional<Book> oldBook = bookRepository.findById(id);
+        if (oldBook.isPresent()) {
+            oldBook.get().setEnabled(true);
+            return new ResponseEntity<>(bookRepository.save(oldBook.get()), HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Book ID is not available", HttpStatus.NOT_FOUND);
+    }
+    public ResponseEntity<?> unableBook(int id) {
+        Optional<Book> oldBook = bookRepository.findById(id);
+        if (oldBook.isPresent()) {
+            oldBook.get().setEnabled(false);
             return new ResponseEntity<>(bookRepository.save(oldBook.get()), HttpStatus.OK);
         }
         return new ResponseEntity<>("Book ID is not available", HttpStatus.NOT_FOUND);
