@@ -2,8 +2,8 @@ package com.phuongtd.book.controllers;
 
 import com.phuongtd.book.entities.Book;
 import com.phuongtd.book.services.BookService;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -22,27 +22,27 @@ public class BookAdminController {
     }
 
     @PostMapping
-    ResponseEntity<?> addBookAsAdmin(@RequestBody Book book) throws ParseException {
+    Book addBookAsAdmin(@RequestBody Book book) throws ParseException {
         return bookService.addBookAsAdmin(book);
     }
 
     @PutMapping("/enable/{id}")
-    ResponseEntity<?> enableBook(@PathVariable int id) throws ParseException {
+    Book enableBook(@PathVariable int id) throws NotFoundException {
         return bookService.enableBook(id);
     }
 
     @PutMapping("/unable/{id}")
-    ResponseEntity<?> unableBook(@PathVariable int id) throws ParseException {
+    Book unableBook(@PathVariable int id) throws NotFoundException {
         return bookService.unableBook(id);
     }
 
     @PutMapping("/edit/{id}")
-    ResponseEntity<?> editBookAsAdmin(@PathVariable int id, @RequestBody Book book) throws ParseException {
+    Book editBookAsAdmin(@PathVariable int id, @RequestBody Book book) throws ParseException, NotFoundException {
         return bookService.update(id, book);
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<?> deleteBookAsAdmin(@PathVariable int id){
+    Book deleteBookAsAdmin(@PathVariable int id) throws NotFoundException {
         return bookService.deleteById(id);
     }
 }

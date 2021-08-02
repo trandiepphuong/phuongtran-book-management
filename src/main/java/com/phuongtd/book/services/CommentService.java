@@ -4,6 +4,7 @@ import com.phuongtd.book.entities.Book;
 import com.phuongtd.book.entities.Comment;
 import com.phuongtd.book.repositories.BookRepository;
 import com.phuongtd.book.repositories.CommentRepository;
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -34,42 +34,43 @@ public class CommentService {
         return formatter1.parse(date + " " + time);
     }
 
-    public ResponseEntity<?> getCommentsByBookId(int bookId) {
+    public List<Comment> getCommentsByBookId(int bookId) throws NotFoundException {
         Optional<Book> book = bookRepository.findById(bookId);
         if (book.isPresent()) {
             List<Comment> comments = commentRepository.findByBook(book.get());
-            return new ResponseEntity<>(comments, HttpStatus.OK);
+            return comments;
         }
-        return new ResponseEntity<>("Book ID is not available", HttpStatus.NOT_FOUND);
+        throw new NotFoundException("Not found exception");
     }
 
-    public ResponseEntity<?> addComment(int bookId, Comment comment) throws ParseException {
+    public Comment addComment(int bookId, Comment comment) throws ParseException, NotFoundException {
         Optional<Book> book = bookRepository.findById(bookId);
         if (book.isPresent()) {
             comment.setCreatedAt(getCurrentTime());
             comment.setUpdatedAt(getCurrentTime());
             comment.setBook(book.get());
-            return new ResponseEntity<>(commentRepository.save(comment), HttpStatus.CREATED);
+            return commentRepository.save(comment);
         }
-        return new ResponseEntity<>("Book ID is not available", HttpStatus.NOT_FOUND);
+        throw new NotFoundException("Not found exception");
     }
 
-    public ResponseEntity<?> editComment(int commentId, Comment comment) throws ParseException {
+    public Comment editComment(int commentId, Comment comment) throws ParseException, NotFoundException {
         Optional<Comment> oldComment = commentRepository.findById(commentId);
         if (oldComment.isPresent()) {
             oldComment.get().setUpdatedAt(getCurrentTime());
             oldComment.get().setMessage(comment.getMessage());
-            return new ResponseEntity<>(commentRepository.save(oldComment.get()), HttpStatus.OK);
+            return commentRepository.save(oldComment.get());
         }
-        return new ResponseEntity<>("Comment ID is not available", HttpStatus.NOT_FOUND);
+
+        throw new NotFoundException("Not found exception");
     }
 
-    public ResponseEntity<?> delete(int commentId) {
+    public Comment delete(int commentId) throws NotFoundException {
         Optional<Comment> comment = commentRepository.findById(commentId);
         if (comment.isPresent()){
             commentRepository.deleteById(commentId);
-            return new ResponseEntity<>(comment,HttpStatus.OK);
+            return comment.get();
         }
-        return new ResponseEntity<>("Comment ID is not available", HttpStatus.NOT_FOUND);
+        throw new NotFoundException("Not found exception");
     }
 }
