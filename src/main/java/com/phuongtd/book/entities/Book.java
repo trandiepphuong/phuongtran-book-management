@@ -47,4 +47,6 @@ public class Book {
     @OneToMany(mappedBy = "book",fetch = FetchType.EAGER)
     List<Comment> commentList;
 
+    @Column(name="image")
+    String image;
 }

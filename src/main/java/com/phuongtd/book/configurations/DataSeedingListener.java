@@ -27,7 +27,7 @@ public class DataSeedingListener implements ApplicationListener<ContextRefreshed
     @Autowired
     private RoleRepository roleRepository;
 
-    private void addUserIfMissing(String email, String password, String role){
+    private void addUserIfMissing(String email, String password, String role) {
         if (userRepository.findByEmail(email) == null) {
             User user = new User();
             user.setEmail(email);
@@ -37,16 +37,15 @@ public class DataSeedingListener implements ApplicationListener<ContextRefreshed
             userRepository.save(user);
         }
     }
+
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         addUserIfMissing("user@gmail.com", "456", "ROLE_USER");
         addUserIfMissing("admin@gmail.com", "123", "ROLE_ADMIN");
-        if(signingKey == null || signingKey.length() ==0){
+        if (signingKey == null || signingKey.length() == 0) {
             String jws = Jwts.builder()
                     .setSubject("Book")
                     .signWith(SignatureAlgorithm.HS256, "BookApi").compact();
-            System.out.println("Use this jwt key:");
-            System.out.println("jwt-key=" + jws);
         }
     }
 }

@@ -4,10 +4,12 @@ import com.phuongtd.book.entities.Book;
 import com.phuongtd.book.services.BookService;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import java.text.ParseException;
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/books")
@@ -17,15 +19,14 @@ public class BookController {
     BookService bookService;
 
     @GetMapping
-    public List<Book> getEnabledBook() {
-        return bookService.findEnabledBook();
+    @PermitAll
+    public ResponseEntity<Map<String, Object>> getEnabledBook( @RequestParam(required = false) String keyword,
+                                                               @RequestParam(required = false, defaultValue = "") String orderBy,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                              @RequestParam(defaultValue = "3") int size) {
+        return bookService.findEnabledBook(page, size, keyword, orderBy);
     }
 
-
-    @GetMapping("/search")
-    public List<Book> findByTitleOrAuthor(@RequestParam String keyword, @RequestParam String orderBy) {
-        return bookService.findByTitleOrAuthor(keyword,orderBy);
-    }
 
     @GetMapping("/{id}")
     public Book findById(@PathVariable int id) throws NotFoundException {

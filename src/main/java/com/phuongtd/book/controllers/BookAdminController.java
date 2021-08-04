@@ -26,17 +26,17 @@ public class BookAdminController {
         return bookService.addBookAsAdmin(book);
     }
 
-    @PutMapping("/enable/{id}")
+    @PutMapping("/{id}/enable")
     Book enableBook(@PathVariable int id) throws NotFoundException {
         return bookService.enableBook(id);
     }
 
-    @PutMapping("/unable/{id}")
+    @PutMapping("/{id}/disable")
     Book unableBook(@PathVariable int id) throws NotFoundException {
         return bookService.unableBook(id);
     }
 
-    @PutMapping("/edit/{id}")
+    @PutMapping("/{id}")
     Book editBookAsAdmin(@PathVariable int id, @RequestBody Book book) throws ParseException, NotFoundException {
         return bookService.update(id, book);
     }

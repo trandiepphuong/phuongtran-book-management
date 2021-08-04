@@ -4,15 +4,20 @@ import com.phuongtd.book.entities.Book;
 import com.phuongtd.book.repositories.BookRepository;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class BookService {
@@ -26,26 +31,46 @@ public class BookService {
         String time = datetime.substring(11, 19);
         return formatter.parse(date + " " + time);
     }
-    public List<Book> filterEnabled(List<Book> bookList){
-        List<Book> result = new ArrayList<>();
-        for (Book book : bookList){
-            if (book.isEnabled()) result.add(book);
+
+    public Page<Book> filterEnabled(Page<Book> bookList) {
+        List<Book> temp = bookList.getContent();
+        for (Book book : temp) {
+            if (!book.isEnabled()) temp.remove(book);
         }
-        return result;
-    }
-    public List<Book> findEnabledBook() {
-        return filterEnabled(bookRepository.findAll());
+        Page<Book> pageTuts = new PageImpl<Book>(temp);
+        return pageTuts;
     }
 
-    public List<Book> findByTitleOrAuthor(String keyword, String orderBy) {
-        if (orderBy.equals("title")) {
-            return filterEnabled(bookRepository.findByTitleOrAuthorByOrderByTitle(keyword));
-        } else if (orderBy.equals("author")) {
-            return filterEnabled(bookRepository.findByTitleOrAuthorByOrderByAuthor(keyword));
-        } else if (orderBy.equals("created")) {
-            return filterEnabled(bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword));
+    public ResponseEntity<Map<String, Object>> findEnabledBook(int page, int size, String keyword, String orderBy) {
+        try {
+            Pageable paging = PageRequest.of(page, size);
+            Page<Book> pageTuts;
+            if (keyword == null) {
+                pageTuts = bookRepository.findAllByEnabled(paging);
+            } else {
+                if (orderBy.equals("title")) {
+                    pageTuts = bookRepository.findByTitleOrAuthorByOrderByTitleAndByEnabled(keyword, paging);
+                    System.out.println("orderbytitle");
+                } else if (orderBy.equals("author")) {
+                    pageTuts = bookRepository.findByTitleOrAuthorByOrderByAuthor(keyword, paging);
+                    System.out.println("orderbyauthor");
+                } else if (orderBy.equals("created")) {
+                    pageTuts = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
+                    System.out.println("orderbycreatedat");
+                }
+                else
+                pageTuts = bookRepository.findByTitleOrAuthor(keyword, paging);
+            }
+            List<Book> books = pageTuts.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("books", books);
+            response.put("currentPage", pageTuts.getNumber());
+            response.put("totalItems", pageTuts.getTotalElements());
+            response.put("totalPages", pageTuts.getTotalPages());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return filterEnabled(bookRepository.findByTitleOrAuthor(keyword));
     }
 
     public Book findById(int id) throws NotFoundException {
@@ -53,7 +78,7 @@ public class BookService {
         if (book.isPresent()) {
             return book.get();
         }
-        throw new NotFoundException("Not found exception");
+        throw new NotFoundException("Book ID " + id + " is not found.");
     }
 
     public Book addBook(Book book) throws ParseException {
@@ -69,7 +94,7 @@ public class BookService {
             bookRepository.deleteById(id);
             return book.get();
         }
-        throw new NotFoundException("Not found exception");
+        throw new NotFoundException("Book ID " + id + " is not found.");
     }
 
     public Book update(int id, Book book) throws ParseException, NotFoundException {
@@ -82,7 +107,7 @@ public class BookService {
             oldBook.get().setCommentList(book.getCommentList());
             return bookRepository.save(oldBook.get());
         }
-        throw new NotFoundException("Not found exception");
+        throw new NotFoundException("Book ID " + id + " is not found.");
     }
 
     public List<Book> findAll() {
@@ -104,6 +129,7 @@ public class BookService {
         }
         throw new NotFoundException("Not found exception");
     }
+
     public Book unableBook(int id) throws NotFoundException {
         Optional<Book> oldBook = bookRepository.findById(id);
         if (oldBook.isPresent()) {
