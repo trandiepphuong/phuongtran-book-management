@@ -32,21 +32,12 @@ public class BookService {
         return formatter.parse(date + " " + time);
     }
 
-    public Page<Book> filterEnabled(Page<Book> bookList) {
-        List<Book> temp = bookList.getContent();
-        for (Book book : temp) {
-            if (!book.isEnabled()) temp.remove(book);
-        }
-        Page<Book> pageTuts = new PageImpl<Book>(temp);
-        return pageTuts;
-    }
-
     public ResponseEntity<Map<String, Object>> findEnabledBook(int page, int size, String keyword, String orderBy) {
         try {
             Pageable paging = PageRequest.of(page, size);
             Page<Book> pageTuts;
             if (keyword == null) {
-                pageTuts = bookRepository.findAllByEnabled(paging);
+                pageTuts = bookRepository.findAllByEnabled(paging, true);
             } else {
                 if (orderBy.equals("title")) {
                     pageTuts = bookRepository.findByTitleOrAuthorByOrderByTitleAndByEnabled(keyword, paging);

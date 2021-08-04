@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer> {
 
-    Page<Book> findAllByEnabled(Pageable pageable);
+    Page<Book> findAllByEnabled(Pageable pageable, Boolean enabled);
 
     @Query( value = "SELECT * FROM Book b WHERE b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%') AND b.enabled = true",
             nativeQuery = true)
