@@ -1,7 +1,9 @@
 package com.phuongtd.book.services;
 
 import com.phuongtd.book.entities.Book;
+import com.phuongtd.book.entities.User;
 import com.phuongtd.book.repositories.BookRepository;
+import com.phuongtd.book.repositories.UserRepository;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +26,9 @@ public class BookService {
     @Autowired
     BookRepository bookRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
     public Date getCurrentTime() throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String datetime = LocalDateTime.now().toString();
@@ -32,7 +37,7 @@ public class BookService {
         return formatter.parse(date + " " + time);
     }
 
-    public ResponseEntity<Map<String, Object>> findEnabledBook(int page, int size, String keyword, String orderBy) {
+    public Map<String, Object> findEnabledBook(int page, int size, String keyword, String orderBy) throws NotFoundException {
         try {
             Pageable paging = PageRequest.of(page, size);
             Page<Book> pageTuts;
@@ -48,9 +53,8 @@ public class BookService {
                 } else if (orderBy.equals("created")) {
                     pageTuts = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
                     System.out.println("orderbycreatedat");
-                }
-                else
-                pageTuts = bookRepository.findByTitleOrAuthor(keyword, paging);
+                } else
+                    pageTuts = bookRepository.findByTitleOrAuthor(keyword, paging);
             }
             List<Book> books = pageTuts.getContent();
             Map<String, Object> response = new HashMap<>();
@@ -58,9 +62,9 @@ public class BookService {
             response.put("currentPage", pageTuts.getNumber());
             response.put("totalItems", pageTuts.getTotalElements());
             response.put("totalPages", pageTuts.getTotalPages());
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return response;
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new NotFoundException("Not found exception");
         }
     }
 
@@ -118,7 +122,7 @@ public class BookService {
             oldBook.get().setEnabled(true);
             return bookRepository.save(oldBook.get());
         }
-        throw new NotFoundException("Not found exception");
+        throw new NotFoundException("Book ID " + id + " is not found.");
     }
 
     public Book unableBook(int id) throws NotFoundException {
@@ -127,6 +131,14 @@ public class BookService {
             oldBook.get().setEnabled(false);
             return bookRepository.save(oldBook.get());
         }
-        throw new NotFoundException("Not found exception");
+        throw new NotFoundException("Book ID " + id + " is not found.");
+    }
+
+    public List<Book> getBooksByUserId(int id) throws NotFoundException {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isPresent()) {
+            return bookRepository.findByUser(user);
+        }
+        throw new NotFoundException("User ID " + id + " is not found.");
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.security.PermitAll;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -20,10 +21,10 @@ public class BookController {
 
     @GetMapping
     @PermitAll
-    public ResponseEntity<Map<String, Object>> getEnabledBook( @RequestParam(required = false) String keyword,
-                                                               @RequestParam(required = false, defaultValue = "") String orderBy,
-                                                               @RequestParam(defaultValue = "0") int page,
-                                                              @RequestParam(defaultValue = "3") int size) {
+    public Map<String, Object> getEnabledBook(@RequestParam(required = false) String keyword,
+                                              @RequestParam(required = false, defaultValue = "") String orderBy,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "3") int size) throws NotFoundException {
         return bookService.findEnabledBook(page, size, keyword, orderBy);
     }
 
@@ -46,5 +47,10 @@ public class BookController {
     @PutMapping("/{id}")
     public Book update(@PathVariable int id, @RequestBody Book book) throws ParseException, NotFoundException {
         return bookService.update(id, book);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<Book> getBooksByUserId(@PathVariable int userId) throws NotFoundException {
+        return bookService.getBooksByUserId(userId);
     }
 }
