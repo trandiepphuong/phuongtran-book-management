@@ -40,28 +40,26 @@ public class BookService {
     public Map<String, Object> findEnabledBook(int page, int size, String keyword, String orderBy) throws NotFoundException {
         try {
             Pageable paging = PageRequest.of(page, size);
-            Page<Book> pageTuts;
-            if (keyword == null) {
-                pageTuts = bookRepository.findAllByEnabled(paging, true);
+            Page<Book> bookPage;
+            if (orderBy.equals("title")) {
+                bookPage = bookRepository.findByTitleOrAuthorByOrderByTitleAndByEnabled(keyword, paging);
+                System.out.println("sort by tilte");
+            } else if (orderBy.equals("author")) {
+                bookPage = bookRepository.findByTitleOrAuthorByOrderByAuthor(keyword, paging);
+                System.out.println("sort by author");
+            } else if (orderBy.equals("created")) {
+                bookPage = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
+                System.out.println("sort by created");
             } else {
-                if (orderBy.equals("title")) {
-                    pageTuts = bookRepository.findByTitleOrAuthorByOrderByTitleAndByEnabled(keyword, paging);
-                    System.out.println("orderbytitle");
-                } else if (orderBy.equals("author")) {
-                    pageTuts = bookRepository.findByTitleOrAuthorByOrderByAuthor(keyword, paging);
-                    System.out.println("orderbyauthor");
-                } else if (orderBy.equals("created")) {
-                    pageTuts = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
-                    System.out.println("orderbycreatedat");
-                } else
-                    pageTuts = bookRepository.findByTitleOrAuthor(keyword, paging);
+                bookPage = bookRepository.findByTitleOrAuthor(keyword, paging);
+                System.out.println("sort nothing");
             }
-            List<Book> books = pageTuts.getContent();
+            List<Book> books = bookPage.getContent();
             Map<String, Object> response = new HashMap<>();
             response.put("books", books);
-            response.put("currentPage", pageTuts.getNumber());
-            response.put("totalItems", pageTuts.getTotalElements());
-            response.put("totalPages", pageTuts.getTotalPages());
+            response.put("currentPage", bookPage.getNumber());
+            response.put("totalItems", bookPage.getTotalElements());
+            response.put("totalPages", bookPage.getTotalPages());
             return response;
         } catch (Exception e) {
             throw new NotFoundException("Not found exception");
@@ -125,7 +123,7 @@ public class BookService {
         throw new NotFoundException("Book ID " + id + " is not found.");
     }
 
-    public Book unableBook(int id) throws NotFoundException {
+    public Book disableBook(int id) throws NotFoundException {
         Optional<Book> oldBook = bookRepository.findById(id);
         if (oldBook.isPresent()) {
             oldBook.get().setEnabled(false);

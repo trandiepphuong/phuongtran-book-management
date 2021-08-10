@@ -13,21 +13,19 @@ import java.util.Optional;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Integer> {
 
-    Page<Book> findAllByEnabled(Pageable pageable, Boolean enabled);
-
-    @Query( value = "SELECT * FROM Book b WHERE b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%') AND b.enabled = true",
+    @Query( value = "SELECT * FROM Book b WHERE (b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%')) AND b.enabled = 'true'",
             nativeQuery = true)
     Page<Book> findByTitleOrAuthor(String keyword, Pageable pageable);
 
-    @Query( value = "SELECT * FROM Book b WHERE b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%') AND b.enabled = true ORDER BY b.title",
+    @Query( value = "SELECT * FROM Book b WHERE (b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%')) AND b.enabled = 'true' ORDER BY b.title",
             nativeQuery = true)
     Page<Book> findByTitleOrAuthorByOrderByTitleAndByEnabled(String keyword, Pageable pageable);
 
-    @Query( value = "SELECT * FROM Book b WHERE b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%') AND b.enabled = true ORDER BY b.author",
+    @Query( value = "SELECT * FROM Book b WHERE (b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%')) AND b.enabled = 'true' ORDER BY b.author",
             nativeQuery = true)
     Page<Book> findByTitleOrAuthorByOrderByAuthor(String keyword, Pageable pageable);
 
-    @Query( value = "SELECT * FROM Book b WHERE b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%') AND b.enabled = true ORDER BY b.createdAt",
+    @Query( value = "SELECT * FROM Book b WHERE (b.title LIKE CONCAT('%',?1,'%') OR b.author LIKE CONCAT('%',?1,'%')) AND b.enabled = 'true' ORDER BY b.createdAt",
             nativeQuery = true)
     Page<Book> findByTitleOrAuthorByOrderByCreatedAt(String keyword, Pageable pageable);
 

@@ -14,7 +14,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class BookController {
     @Autowired
     BookService bookService;

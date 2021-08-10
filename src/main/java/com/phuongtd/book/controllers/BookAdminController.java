@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/books")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class BookAdminController {
     @Autowired
     BookService bookService;
@@ -32,8 +31,8 @@ public class BookAdminController {
     }
 
     @PutMapping("/{id}/disable")
-    Book unableBook(@PathVariable int id) throws NotFoundException {
-        return bookService.unableBook(id);
+    Book disableBook (@PathVariable int id) throws NotFoundException {
+        return bookService.disableBook (id);
     }
 
     @PutMapping("/{id}")
