@@ -22,8 +22,8 @@ public class AuthenticationController {
         return userService.login(login);
     }
 
-//    @PostMapping("/register")
-//    public String register(@RequestBody User user) {
-//        return  userService.register(user);
-//    }
+    @PostMapping("/register")
+    public String register(@RequestBody User user) {
+        return  userService.register(user);
+    }
 }

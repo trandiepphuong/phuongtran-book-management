@@ -8,16 +8,20 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/books")
-public class BookAdminController {
+public class AdminBookController {
     @Autowired
     BookService bookService;
 
     @GetMapping
-    public List<Book> findAll() {
-        return bookService.findAll();
+    public Map<String, Object> findAll(@RequestParam(required = false) String keyword,
+                                              @RequestParam(required = false, defaultValue = "") String orderBy,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "3") int size) throws NotFoundException {
+        return bookService.findAll(page, size, keyword, orderBy);
     }
 
     @PostMapping

@@ -47,12 +47,12 @@ public class BookService {
             } else if (orderBy.equals("author")) {
                 bookPage = bookRepository.findByTitleOrAuthorByOrderByAuthor(keyword, paging);
                 System.out.println("sort by author");
-            } else if (orderBy.equals("created")) {
+//            } else if (orderBy.equals("create")) {
+//                bookPage = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
+//                System.out.println("sort by created");
+            } else {
                 bookPage = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
                 System.out.println("sort by created");
-            } else {
-                bookPage = bookRepository.findByTitleOrAuthor(keyword, paging);
-                System.out.println("sort nothing");
             }
             List<Book> books = bookPage.getContent();
             Map<String, Object> response = new HashMap<>();
@@ -103,8 +103,30 @@ public class BookService {
         throw new NotFoundException("Book ID " + id + " is not found.");
     }
 
-    public List<Book> findAll() {
-        return bookRepository.findAll();
+    public Map<String, Object> findAll(int page, int size, String keyword, String orderBy) throws NotFoundException {
+        try {
+            Pageable paging = PageRequest.of(page, size);
+            Page<Book> bookPage;
+            if (orderBy.equals("title")) {
+                bookPage = bookRepository.findAllByTitleOrAuthorByOrderByTitleAndByEnabled(keyword, paging);
+                System.out.println("sort by tilte");
+            } else if (orderBy.equals("author")) {
+                bookPage = bookRepository.findAllByTitleOrAuthorByOrderByAuthor(keyword, paging);
+                System.out.println("sort by author");
+            } else {
+                bookPage = bookRepository.findAllByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
+                System.out.println("sort by created");
+            }
+            List<Book> books = bookPage.getContent();
+            Map<String, Object> response = new HashMap<>();
+            response.put("books", books);
+            response.put("currentPage", bookPage.getNumber());
+            response.put("totalItems", bookPage.getTotalElements());
+            response.put("totalPages", bookPage.getTotalPages());
+            return response;
+        } catch (Exception e) {
+            throw new NotFoundException("Not found exception");
+        }
     }
 
     public Book addBookAsAdmin(Book book) throws ParseException {
