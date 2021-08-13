@@ -1,2 +1,2 @@
 heroku ps:scale web=1
-java -Dserver.port=$PORT $JAVA_OPTS -jar build/libs/*.jar
+web: java -jar $JAVA_OPTS -Dserver.port=$PORT build/libs/*.jar
