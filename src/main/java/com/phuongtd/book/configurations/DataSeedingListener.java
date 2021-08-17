@@ -42,6 +42,7 @@ public class DataSeedingListener implements ApplicationListener<ContextRefreshed
     public void onApplicationEvent(ContextRefreshedEvent event) {
         addUserIfMissing("user@gmail.com", "456", "ROLE_USER");
         addUserIfMissing("admin@gmail.com", "123", "ROLE_ADMIN");
+        addUserIfMissing("superadmin@gmail.com", "123", "ROLE_SUPERADMIN");
         if (signingKey == null || signingKey.length() == 0) {
             String jws = Jwts.builder()
                     .setSubject("Book")

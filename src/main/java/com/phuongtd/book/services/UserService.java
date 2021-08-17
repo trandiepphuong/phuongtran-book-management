@@ -55,15 +55,15 @@ public class UserService {
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
 
-    public String register(User user) {
+    public ResponseEntity<User> register(User user) {
         if (this.findByEmail(user.getEmail()) == null) {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
             user.setRole(roleService.findByName("ROLE_USER"));
             user.setEnabled(true);
             this.save(user);
-            return "Register successful!";
+            return new ResponseEntity<>(HttpStatus.OK);
         }
-        return ("Email has already been used! Please register again!");
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     public User setAdmin(int id) throws Exception {
@@ -118,7 +118,15 @@ public class UserService {
         List<User> allUser = userRepository.findAllByOrderById();
         List<User> result = new ArrayList<>();
         for (User user : allUser) {
-            if (user.getRole().getId() == 2) result.add(user);
+            if (user.getRole().getName().equals("ROLE_USER")) result.add(user);
+        }
+        return result;
+    }
+
+    public List<User> findAll() {
+        List<User> result = new ArrayList<>();
+        for (User u : userRepository.findAllByOrderById()) {
+            if (!u.getRole().getName().equals("ROLE_SUPERADMIN")) result.add(u);
         }
         return result;
     }

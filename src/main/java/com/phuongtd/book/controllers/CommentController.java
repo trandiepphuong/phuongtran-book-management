@@ -15,8 +15,12 @@ import java.util.List;
 public class CommentController {
     @Autowired
     CommentService commentService;
+    @GetMapping("/{id}")
+    public Comment findById(@PathVariable int id) throws NotFoundException {
+        return commentService.findById(id);
+    }
 
-    @GetMapping("/{bookId}")
+    @GetMapping("/book/{bookId}")
     public List<Comment> getCommentsByBookId(@PathVariable int bookId) throws NotFoundException {
         return commentService.getCommentsByBookId(bookId);
     }

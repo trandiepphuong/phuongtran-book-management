@@ -47,9 +47,6 @@ public class BookService {
             } else if (orderBy.equals("author")) {
                 bookPage = bookRepository.findByTitleOrAuthorByOrderByAuthor(keyword, paging);
                 System.out.println("sort by author");
-//            } else if (orderBy.equals("create")) {
-//                bookPage = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
-//                System.out.println("sort by created");
             } else {
                 bookPage = bookRepository.findByTitleOrAuthorByOrderByCreatedAt(keyword, paging);
                 System.out.println("sort by created");

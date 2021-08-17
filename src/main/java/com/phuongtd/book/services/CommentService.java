@@ -67,8 +67,16 @@ public class CommentService {
 
     public Comment delete(int commentId) throws NotFoundException {
         Optional<Comment> comment = commentRepository.findById(commentId);
-        if (comment.isPresent()){
+        if (comment.isPresent()) {
             commentRepository.deleteById(commentId);
+            return comment.get();
+        }
+        throw new NotFoundException("Not found exception");
+    }
+
+    public Comment findById(int id) throws NotFoundException {
+        Optional<Comment> comment = commentRepository.findById(id);
+        if (comment.isPresent()) {
             return comment.get();
         }
         throw new NotFoundException("Not found exception");
