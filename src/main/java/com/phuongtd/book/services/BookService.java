@@ -95,6 +95,7 @@ public class BookService {
             oldBook.get().setAuthor(book.getAuthor());
             oldBook.get().setDescription(book.getDescription());
             oldBook.get().setCommentList(book.getCommentList());
+            oldBook.get().setImage(book.getImage());
             return bookRepository.save(oldBook.get());
         }
         throw new NotFoundException("Book ID " + id + " is not found.");
