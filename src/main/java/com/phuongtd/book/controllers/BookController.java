@@ -19,7 +19,6 @@ public class BookController {
     BookService bookService;
 
     @GetMapping
-    @PermitAll
     public Map<String, Object> getEnabledBook(@RequestParam(required = false) String keyword,
                                               @RequestParam(required = false, defaultValue = "") String orderBy,
                                               @RequestParam(defaultValue = "0") int page,
