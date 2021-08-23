@@ -4,6 +4,7 @@ import com.phuongtd.book.entities.User;
 import com.phuongtd.book.services.UserService;
 import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,5 +26,9 @@ public class AdminUserController {
     @PutMapping("/{id}/disable")
     public User disableUser(@PathVariable int id) throws NotFoundException {
         return userService.disable(id);
+    }
+    @PostMapping
+    public ResponseEntity<User> addUser(@RequestBody User user){
+        return userService.addUser(user);
     }
 }

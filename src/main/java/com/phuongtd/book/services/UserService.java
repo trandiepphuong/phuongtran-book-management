@@ -66,6 +66,17 @@ public class UserService {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    public ResponseEntity<User> addUser(User user) {
+        if (this.findByEmail(user.getEmail()) == null) {
+            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+            user.setRole(roleService.findByName(user.getRole().getName()));
+            user.setEnabled(true);
+            this.save(user);
+            return new ResponseEntity<User>(user, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     public User setAdmin(int id) throws Exception {
         Optional<User> user = userRepository.findById(id);
         boolean alreadyAdmin = false;
