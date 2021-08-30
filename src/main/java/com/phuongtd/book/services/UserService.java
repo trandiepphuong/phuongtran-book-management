@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,20 +64,22 @@ public class UserService {
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
     }
 
-    public ResponseEntity<User> loginGoogle(GooglePojo googlePojo) throws IOException {
-        System.out.println(googlePojo.toString());
+    public ResponseEntity<User> loginGoogle(GooglePojo googlePojo) throws IOException, GeneralSecurityException, IllegalAccessException {
+        GooglePojo userInfo = googleUtils.getUserInfo(googlePojo.getAccessToken());
         User user = new User();
-        user.setEmail(googlePojo.getEmail());
-        user.setFirstName(googlePojo.getGivenName());
-        user.setLastName(googlePojo.getFamilyName());
+        user.setEmail(userInfo.getEmail());
+        user.setFirstName(userInfo.getGivenName());
+        user.setLastName(userInfo.getFamilyName());
         user.setRole(roleService.findByName("ROLE_USER"));
+        //user.setAvatar(userInfo.getPicture());
         user.setEnabled(true);
-        if (this.findByEmailAndLoginWithGoogle(googlePojo.getEmail(), true) == null) {
+        System.out.println(userInfo.toString());
+        if (userRepository.findByEmailAndLoginWithGoogle(userInfo.getEmail(), true) == null) {
             user.setPassword("");
             user.setLoginWithGoogle(true);
-            this.save(user);
+            userRepository.save(user);
         }
-        UserDetails userDetail = googleUtils.buildUser(googlePojo);
+        UserDetails userDetail = googleUtils.buildUser(userInfo);
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetail, null,
                 userDetail.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);

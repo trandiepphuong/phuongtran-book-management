@@ -2,13 +2,17 @@ package com.phuongtd.book.models;
 
 
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
 
-import org.apache.hc.client5.http.ClientProtocolException;
-import org.apache.hc.client5.http.fluent.Form;
-import org.apache.hc.client5.http.fluent.Request;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import org.apache.http.client.ClientProtocolException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,26 +24,59 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class GoogleUtils {
-    @Autowired
-    private Environment env;
-    public String getToken(final String code) throws ClientProtocolException, IOException {
-        String link = env.getProperty("google.link.get.token");
-        String response = Request.post(link)
-                .bodyForm(Form.form().add("client_id", env.getProperty("google.app.id"))
-                        .add("client_secret", env.getProperty("google.app.secret"))
-                        .add("redirect_uri", env.getProperty("google.redirect.uri")).add("code", code)
-                        .add("grant_type", "authorization_code").build())
-                .execute().returnContent().asString();
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = mapper.readTree(response).get("access_token");
-        return node.textValue();
-    }
-    public GooglePojo getUserInfo(final String accessToken) throws ClientProtocolException, IOException {
-        String link = env.getProperty("google.link.get.user_info") + accessToken;
-        String response = Request.get(link).execute().returnContent().asString();
-        ObjectMapper mapper = new ObjectMapper();
-        GooglePojo googlePojo = mapper.readValue(response, GooglePojo.class);
-        System.out.println(googlePojo);
+    public GooglePojo getUserInfo(final String accessToken) throws ClientProtocolException, IOException, IllegalAccessException, GeneralSecurityException {
+//        String link = env.getProperty("google.link.get.user_info") + accessToken;
+//        String response = Request.get(link).execute().returnContent().asString();
+//        ObjectMapper mapper = new ObjectMapper();
+//        GooglePojo googlePojo = mapper.readValue(response, GooglePojo.class);
+//        System.out.println(googlePojo);
+//        return googlePojo;
+        NetHttpTransport transport = new NetHttpTransport();
+        GsonFactory factory = new GsonFactory();
+//        System.out.println(accessToken);
+//        String link = env.getProperty("google.link.get.user_info") + accessToken;
+//        String response = Request.Get(link).execute().returnContent().asString();
+//        ObjectMapper mapper = new ObjectMapper();
+//        GooglePojo googlePojo = mapper.readValue(response, GooglePojo.class);
+//        System.out.println(googlePojo);
+//        return googlePojo;
+        String token = accessToken;
+
+        // Create verifier
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, factory)
+                .build();
+
+        // Verify it
+        GoogleIdToken idToken = verifier.verify(token);
+        if (idToken == null) {
+            throw new IllegalAccessException("Invalid id_token");
+        }
+        Payload payload = idToken.getPayload();
+
+        // Print user identifier
+        String userId = payload.getSubject();
+        System.out.println("User ID: " + userId);
+
+        // Get profile information from payload
+        String email = payload.getEmail();
+        boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+        String name = (String) payload.get("name");
+        String pictureUrl = (String) payload.get("picture");
+        String locale = (String) payload.get("locale");
+        String familyName = (String) payload.get("family_name");
+        String givenName = (String) payload.get("given_name");
+        // Access payload
+        System.out.println("Email: " + idToken.getPayload().getEmail());
+        System.out.println("Name: "+ name);
+        System.out.println("pictureUrl: "+pictureUrl);
+        System.out.println("givenName"+givenName);
+        System.out.println("familyName"+familyName);
+        GooglePojo googlePojo = new GooglePojo();
+        googlePojo.setEmail(idToken.getPayload().getEmail());
+        googlePojo.setFamilyName(familyName);
+        googlePojo.setGivenName(givenName);
+        googlePojo.setPicture(pictureUrl);
+        //googlePojo.setName(name);
         return googlePojo;
     }
     public UserDetails buildUser(GooglePojo googlePojo) {
@@ -48,7 +85,7 @@ public class GoogleUtils {
         boolean credentialsNonExpired = true;
         boolean accountNonLocked = true;
         List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        authorities.add(new SimpleGrantedAuthority("ROLE_STAFF"));
         UserDetails userDetail = new User(googlePojo.getEmail(),
                 "", enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
         return userDetail;
