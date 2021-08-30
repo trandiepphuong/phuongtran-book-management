@@ -1,15 +1,12 @@
 package com.phuongtd.book.controllers;
 
-import com.phuongtd.book.entities.Login;
+import com.phuongtd.book.models.GooglePojo;
+import com.phuongtd.book.models.Login;
 import com.phuongtd.book.entities.User;
 import com.phuongtd.book.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
@@ -24,6 +21,11 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody User user) {
-        return  userService.register(user);
+        return userService.register(user);
+    }
+
+    @PostMapping("/login-google")
+    public ResponseEntity<User> loginGoogle(@RequestBody GooglePojo googlePojo) throws Exception {
+        return userService.loginGoogle(googlePojo);
     }
 }

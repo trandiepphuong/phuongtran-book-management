@@ -1,7 +1,9 @@
 package com.phuongtd.book.services;
 
 import com.phuongtd.book.configurations.TokenProvider;
-import com.phuongtd.book.entities.Login;
+import com.phuongtd.book.models.GooglePojo;
+import com.phuongtd.book.models.GoogleUtils;
+import com.phuongtd.book.models.Login;
 import com.phuongtd.book.entities.User;
 import com.phuongtd.book.repositories.UserRepository;
 import javassist.NotFoundException;
@@ -12,9 +14,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +34,8 @@ public class UserService {
     private TokenProvider jwtTokenUtil;
     @Autowired
     private RoleService roleService;
-
+    @Autowired
+    private GoogleUtils googleUtils;
     public User save(User user) {
         return userRepository.save(user);
     }
@@ -37,7 +43,9 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-
+    public User findByEmailAndLoginWithGoogle(String email, Boolean loginWithGoogle){
+        return userRepository.findByEmailAndLoginWithGoogle(email, loginWithGoogle);
+    }
     public ResponseEntity<User> login(Login login) {
         User user = userRepository.findByEmail(login.getUsername());
         if (user.getEnabled() == true) {
@@ -53,6 +61,28 @@ public class UserService {
             return new ResponseEntity(user, HttpStatus.OK);
         }
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+    }
+
+    public ResponseEntity<User> loginGoogle(GooglePojo googlePojo) throws IOException {
+        System.out.println(googlePojo.toString());
+        User user = new User();
+        user.setEmail(googlePojo.getEmail());
+        user.setFirstName(googlePojo.getGivenName());
+        user.setLastName(googlePojo.getFamilyName());
+        user.setRole(roleService.findByName("ROLE_USER"));
+        user.setEnabled(true);
+        if (this.findByEmailAndLoginWithGoogle(googlePojo.getEmail(), true) == null) {
+            user.setPassword("");
+            user.setLoginWithGoogle(true);
+            this.save(user);
+        }
+        UserDetails userDetail = googleUtils.buildUser(googlePojo);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetail, null,
+                userDetail.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        final String token = jwtTokenUtil.generateToken(authentication);
+        user.setToken(token);
+        return new ResponseEntity(user, HttpStatus.OK);
     }
 
     public ResponseEntity<User> register(User user) {

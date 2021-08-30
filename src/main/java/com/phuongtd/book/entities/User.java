@@ -46,4 +46,7 @@ public class User {
     List<Book> bookList;
 
     String token;
+
+    @Column(name="login_with_google")
+    Boolean loginWithGoogle;
 }

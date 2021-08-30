@@ -35,6 +35,12 @@ dependencies {
 	implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
 	implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+	implementation ("org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure:2.0.0.RELEASE")
+	implementation group: 'org.springframework.security', name: 'spring-security-oauth2-client'
+	implementation group: 'javax.validation', name: 'validation-api'
+	implementation group: 'org.apache.httpcomponents', name: 'httpcore'
+	implementation group: 'org.apache.httpcomponents', name: 'httpclient'
+	implementation 'org.apache.httpcomponents.client5:httpclient5-fluent'
 }
 
 test {
